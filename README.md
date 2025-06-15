@@ -14,6 +14,7 @@
 - 📚 Ready for research and publication with notebooks and documentation.
 
 ---
+![Pipeline Diagram](docs/GraphicalAbstract_2.png)
 
 ## 🧱 Project Structure
 DRR2-HUmap/
