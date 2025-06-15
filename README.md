@@ -17,17 +17,19 @@
 ![Pipeline Diagram](docs/GraphicalAbstract_2.png)
 
 ## 🧱 Project Structure
+```
 DRR2-HUmap/
-├── src/ # Main package (segmentation, regression, utils)
-├── scripts/ # Main training/inference pipeline scripts
-├── examples/ # Sample config files
-├── notebooks/ # Jupyter examples and evaluations
-├── docs/ # Method explanations and design notes
-├── tests/ # Basic unit test framework
-├── requirements.txt # Python dependencies
-├── GETTING_STARTED.md # How to install and run
-├── README.md # Project overview (this file)
-└── LICENSE # License file
+├── src/                 # Main package (segmentation, regression, utils)
+├── scripts/             # Main training/inference pipeline scripts
+├── examples/            # Sample config files
+├── notebooks/           # Jupyter examples and evaluations
+├── docs/                # Method explanations and design notes
+├── tests/               # Basic unit test framework
+├── requirements.txt     # Python dependencies
+├── GETTING_STARTED.md   # How to install and run
+├── README.md            # Project overview (this file)
+└── LICENSE              # License file
+```
 
 
 ---
