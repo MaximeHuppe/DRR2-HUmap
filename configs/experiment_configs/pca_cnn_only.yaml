@@ -1,0 +1,156 @@
+# PCA-CNN Only Experiment Configuration
+# This configuration is for running only the PCA-CNN HU prediction pipeline
+# Assumes you already have segmented DRRs as input
+
+# Inherit from default configuration
+_base_: "../default.yaml"
+
+# Override specific settings for PCA-CNN-only workflow
+experiment_name: "pca_cnn_only"
+description: "PCA-CNN HU Prediction Pipeline Only"
+
+# Data Configuration (PCA-CNN focus)
+data:
+  # Input should be pre-segmented DRRs
+  drr_format: "npy"
+  mask_format: "npy"
+  
+  # Skip original sizes, work with PCA-CNN input size
+  original_drr_size: null
+  segmentation_size: null
+  pca_cnn_size: [64, 256]  # Expected input size for PCA-CNN
+  
+  # Volume reconstruction parameters
+  volume_shape: [64, 64, 256]
+  
+  # Data normalization (critical for PCA-CNN)
+  drr_normalization:
+    mean: 0.0425
+    std: 0.0924
+    
+  hu_range:
+    min: -1000
+    max: 3000
+    threshold: -1000
+
+# Disable Segmentation (assuming pre-segmented input)
+segmentation:
+  enabled: false
+
+# PCA-CNN Configuration (detailed)
+pca_cnn:
+  enabled: true
+  
+  # PCA parameters
+  pca:
+    n_components: 10
+    variance_threshold: 0.95
+    
+  # CNN model parameters
+  model:
+    architecture: "PC1Regressor"
+    input_channels: 4  # [raw_ap, raw_ml, clahe_ap, clahe_ml]
+    hidden_dims: [512, 256, 128]
+    dropout_rate: 0.2
+    
+  # Inference parameters
+  inference:
+    batch_size: 1
+    use_uncertainty: true
+    n_mc_samples: 10
+    
+  # Preprocessing for CNN input
+  preprocessing:
+    apply_clahe: true
+    clahe_clip_limit: 0.01
+    clahe_tile_size: [16, 16]
+    normalize_channels: true
+    
+  # Volume reconstruction
+  reconstruction:
+    apply_smoothing: false
+    smoothing_sigma: 1.0
+    post_process_volume: true
+
+# Evaluation (reconstruction metrics only)
+evaluation:
+  # No segmentation metrics
+  segmentation_metrics: []
+  
+  # Focus on reconstruction quality
+  reconstruction_metrics:
+    - "mae"           # Mean Absolute Error
+    - "rmse"          # Root Mean Square Error
+    - "ssim"          # Structural Similarity Index
+    - "psnr"          # Peak Signal-to-Noise Ratio
+    - "ncc"           # Normalized Cross Correlation
+    - "voxel_accuracy" # Voxel-wise accuracy
+    
+  # Statistical analysis
+  statistics:
+    confidence_level: 0.95
+    bootstrap_samples: 1000
+    compute_uncertainty_metrics: true
+
+# Visualization (volume reconstruction focus)
+visualization:
+  figure_size: [18, 12]
+  dpi: 300
+  format: "png"
+  
+  colormaps:
+    drr: "gray"
+    volume: "bone"
+    error: "hot"
+    uncertainty: "viridis"
+    
+  show_plots: true
+  save_plots: true
+  output_dir: "outputs/pca_cnn_figures"
+  
+  # Volume visualization settings
+  volume_slices:
+    show_orthogonal: true
+    n_slices_per_axis: 5
+    slice_spacing: "uniform"
+
+# Paths (PCA-CNN models only)
+paths:
+  models:
+    # No segmentation models needed
+    segmentation_ap: null
+    segmentation_ml: null
+    
+    # PCA-CNN models required
+    pca_models_dir: "models/pca_cnn/"
+    pca_components: "models/pca.pkl"
+    scaler: "models/scaler.pkl"
+    indices: "models/indices.npy"
+    
+  # Expected structure for PCA model directory
+  pca_model_files:
+    pc1: "model_pc1_sequential.pt"
+    pc2: "model_pc2_sequential.pt"
+    pc3: "model_pc3_sequential.pt"
+    pc4: "model_pc4_sequential.pt"
+    pc5: "model_pc5_sequential.pt"
+    pc6: "model_pc6_sequential.pt"
+    pc7: "model_pc7_sequential.pt"
+    pc8: "model_pc8_sequential.pt"
+    pc9: "model_pc9_sequential.pt"
+    pc10: "model_pc10_sequential.pt"
+
+# Performance optimization for volume reconstruction
+performance:
+  memory_efficient: true
+  clear_cache: true
+  use_mixed_precision: false  # Can be enabled for larger models
+  
+# Output configuration for volume data
+output:
+  base_dir: "outputs/pca_cnn_results"
+  save_intermediate: true   # Save PC coefficients
+  save_volumes: true
+  save_uncertainty_maps: true
+  save_error_maps: true
+  volume_format: "npy"      # or "nifti" if preferred 

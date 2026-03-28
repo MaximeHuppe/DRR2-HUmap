@@ -1,0 +1,95 @@
+# Segmentation-Only Experiment Configuration
+# This configuration is for running only the DRR segmentation pipeline
+
+# Inherit from default configuration
+_base_: "../default.yaml"
+
+# Override specific settings for segmentation-only workflow
+experiment_name: "segmentation_only"
+description: "DRR Segmentation Pipeline Only"
+
+# Data Configuration (segmentation focus)
+data:
+  # Only need DRR and mask data
+  drr_format: "npy"
+  mask_format: "npy"
+  original_drr_size: [256, 512]
+  segmentation_size: [256, 512]
+  
+  # No volume data needed
+  volume_shape: null
+  
+# Segmentation Configuration (detailed)
+segmentation:
+  model:
+    architecture: "AttentionUNet"
+    input_channels: 1
+    output_channels: 1
+    
+  preprocessing:
+    apply_clahe: true
+    clahe_clip_limit: 0.01
+    clahe_tile_size: [16, 16]
+    normalize: true
+    
+  inference:
+    threshold: 0.5
+    batch_size: 1
+    
+  postprocessing:
+    morphology_operations: true
+    kernel_size: 3
+    remove_small_objects: true
+    min_object_size: 100
+    crop_and_resize: true
+    target_size: [64, 256]  # For potential CNN-PCA input
+
+# Disable PCA-CNN (not needed)
+pca_cnn:
+  enabled: false
+
+# Evaluation (segmentation metrics only)
+evaluation:
+  segmentation_metrics:
+    - "dice_score"
+    - "iou_score"
+    - "hausdorff_distance"
+    - "surface_distance"
+    - "precision"
+    - "recall"
+    - "specificity"
+    - "jaccard_index"
+    
+  # No reconstruction metrics
+  reconstruction_metrics: []
+  
+  # Statistical analysis for segmentation
+  statistics:
+    confidence_level: 0.95
+    bootstrap_samples: 1000
+
+# Visualization (segmentation focus)
+visualization:
+  figure_size: [15, 10]
+  dpi: 300
+  format: "png"
+  
+  colormaps:
+    drr: "gray"
+    mask: "viridis"
+    prediction: "hot"
+    
+  show_plots: true
+  save_plots: true
+  output_dir: "outputs/segmentation_figures"
+
+# Paths (segmentation models only)
+paths:
+  models:
+    segmentation_ap: "models/segmentation_ap.pt"
+    segmentation_ml: "models/segmentation_ml.pt"
+    # No PCA-CNN models needed
+    pca_models_dir: null
+    pca_components: null
+    scaler: null
+    indices: null 

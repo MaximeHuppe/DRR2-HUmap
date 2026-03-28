@@ -1,0 +1,202 @@
+# Evaluation Experiment Configuration
+# This configuration is optimized for comprehensive evaluation and benchmarking
+# of the DRR2-HUmap pipeline performance
+
+# Inherit from default configuration
+_base_: "../default.yaml"
+
+# Override specific settings for evaluation
+experiment_name: "evaluation"
+description: "Comprehensive Evaluation and Benchmarking"
+
+# Data Configuration (evaluation focus)
+data:
+  drr_format: "npy"
+  mask_format: "npy"
+  original_drr_size: [256, 512]
+  segmentation_size: [256, 512]
+  pca_cnn_size: [64, 256]
+  volume_shape: [64, 64, 256]
+  
+  drr_normalization:
+    mean: 0.0425
+    std: 0.0924
+
+# Enable both pipeline stages for comprehensive evaluation
+segmentation:
+  enabled: true
+  inference:
+    threshold: 0.5
+    batch_size: 1
+
+pca_cnn:
+  enabled: true
+  inference:
+    use_uncertainty: true
+    n_mc_samples: 20  # More samples for better uncertainty estimation
+
+# Comprehensive Evaluation Configuration
+evaluation:
+  enabled: true
+  
+  # All segmentation metrics
+  segmentation_metrics:
+    - "dice_score"
+    - "iou_score"
+    - "jaccard_index"
+    - "hausdorff_distance"
+    - "hausdorff_distance_95"
+    - "surface_distance_mean"
+    - "surface_distance_std"
+    - "precision"
+    - "recall"
+    - "specificity"
+    - "f1_score"
+    - "accuracy"
+    - "volume_similarity"
+    
+  # All reconstruction metrics
+  reconstruction_metrics:
+    - "mae"                    # Mean Absolute Error
+    - "rmse"                   # Root Mean Square Error
+    - "ssim"                   # Structural Similarity Index
+    - "psnr"                   # Peak Signal-to-Noise Ratio
+    - "ncc"                    # Normalized Cross Correlation
+    - "mi"                     # Mutual Information
+    - "voxel_accuracy"         # Voxel-wise accuracy
+    - "volume_mae"             # Volume-level MAE
+    - "slice_wise_mae"         # Slice-by-slice MAE
+    - "regional_mae"           # Regional error analysis
+    
+  # Statistical analysis (comprehensive)
+  statistics:
+    confidence_level: 0.95
+    bootstrap_samples: 2000
+    compute_confidence_intervals: true
+    compute_effect_sizes: true
+    
+  # Cross-validation for robust evaluation
+  cross_validation:
+    enabled: true
+    n_folds: 5
+    stratified: true           # Ensure balanced splits
+    
+  # Uncertainty quantification evaluation
+  uncertainty_evaluation:
+    enabled: true
+    calibration_metrics: true
+    reliability_diagrams: true
+    uncertainty_correlation: true
+    
+  # Comparative analysis
+  comparison:
+    baseline_methods: []       # Add baseline method results if available
+    statistical_tests:
+      - "paired_t_test"
+      - "wilcoxon_signed_rank"
+      - "mann_whitney_u"
+      
+  # Error analysis
+  error_analysis:
+    enabled: true
+    categorize_failures: true
+    correlation_analysis: true
+    outlier_detection: true
+
+# Comprehensive Visualization for Evaluation
+visualization:
+  figure_size: [20, 16]
+  dpi: 300
+  format: "png"
+  
+  show_plots: false           # Don't display during batch evaluation
+  save_plots: true
+  output_dir: "outputs/evaluation_figures"
+  
+  # Evaluation-specific plots
+  evaluation_plots:
+    metrics_boxplots: true
+    correlation_matrices: true
+    bland_altman_plots: true
+    error_histograms: true
+    uncertainty_plots: true
+    failure_case_analysis: true
+    performance_heatmaps: true
+    
+  # Statistical visualization
+  statistical_plots:
+    confidence_intervals: true
+    significance_tests: true
+    effect_size_plots: true
+
+# Batch Processing for Evaluation
+batch_processing:
+  enabled: true
+  parallel_processing: true
+  max_workers: 4
+  chunk_size: 10
+  
+  # Progress tracking
+  save_progress: true
+  resume_from_checkpoint: true
+
+# Comprehensive Output for Evaluation
+output:
+  base_dir: "outputs/evaluation_results"
+  create_subdirs: true
+  timestamp_format: "%Y%m%d_%H%M%S"
+  
+  # Detailed result saving
+  save_all_metrics: true
+  save_per_case_results: true
+  save_summary_statistics: true
+  save_cross_validation_results: true
+  save_uncertainty_results: true
+  
+  # Export formats
+  metrics_format: "json"
+  summary_format: "csv"
+  plots_format: "png"
+  
+  # Create comprehensive report
+  generate_report: true
+  report_format: "html"       # or "pdf" if preferred
+
+# Performance monitoring during evaluation
+performance_monitoring:
+  enabled: true
+  track_memory_usage: true
+  track_processing_time: true
+  track_gpu_utilization: true
+  
+  # Profiling
+  detailed_profiling: false   # Enable for performance debugging
+  
+# Quality assurance
+quality_assurance:
+  enabled: true
+  
+  # Data validation
+  validate_inputs: true
+  check_data_integrity: true
+  
+  # Result validation
+  validate_outputs: true
+  sanity_checks: true
+  
+  # Reproducibility
+  set_random_seeds: true
+  random_seed: 42
+  save_environment_info: true
+
+# Logging for evaluation
+logging:
+  level: "INFO"
+  save_logs: true
+  log_dir: "logs/evaluation"
+  
+  # Detailed evaluation logging
+  log_per_case_metrics: true
+  log_statistical_results: true
+  log_performance_metrics: true
+  log_errors_and_warnings: true 

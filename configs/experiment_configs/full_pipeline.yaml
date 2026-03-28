@@ -1,0 +1,213 @@
+# Full Pipeline Experiment Configuration
+# This configuration runs the complete DRR2-HUmap pipeline:
+# DRR → Segmentation → PCA-CNN → Volume Reconstruction
+
+# Inherit from default configuration
+_base_: "../default.yaml"
+
+# Override specific settings for full pipeline
+experiment_name: "full_pipeline"
+description: "Complete DRR2-HUmap Pipeline: Segmentation + PCA-CNN"
+
+# Data Configuration (full pipeline)
+data:
+  drr_format: "npy"
+  mask_format: "npy"
+  
+  # All image sizes needed for pipeline stages
+  original_drr_size: [256, 512]      # Input DRR size
+  segmentation_size: [256, 512]      # Segmentation processing size
+  pca_cnn_size: [64, 256]           # Final size for PCA-CNN
+  
+  # Volume reconstruction
+  volume_shape: [64, 64, 256]
+  
+  # Data normalization
+  drr_normalization:
+    mean: 0.0425
+    std: 0.0924
+    
+  hu_range:
+    min: -1000
+    max: 3000
+    threshold: -1000
+
+# Segmentation Configuration (enabled)
+segmentation:
+  enabled: true
+  
+  model:
+    architecture: "AttentionUNet"
+    input_channels: 1
+    output_channels: 1
+    
+  preprocessing:
+    apply_clahe: true
+    clahe_clip_limit: 0.01
+    clahe_tile_size: [16, 16]
+    
+  inference:
+    threshold: 0.5
+    batch_size: 1
+    
+  postprocessing:
+    morphology_operations: true
+    kernel_size: 3
+    remove_small_objects: true
+    min_object_size: 100
+    crop_and_resize: true
+    target_size: [64, 256]  # Prepare for PCA-CNN
+
+# PCA-CNN Configuration (enabled)
+pca_cnn:
+  enabled: true
+  
+  # PCA parameters
+  pca:
+    n_components: 10
+    variance_threshold: 0.95
+    
+  # CNN model parameters
+  model:
+    architecture: "PC1Regressor"
+    input_channels: 4  # [raw_ap, raw_ml, clahe_ap, clahe_ml]
+    hidden_dims: [512, 256, 128]
+    dropout_rate: 0.2
+    
+  # Inference parameters
+  inference:
+    batch_size: 1
+    use_uncertainty: true
+    n_mc_samples: 10
+    
+  # Volume reconstruction
+  reconstruction:
+    apply_smoothing: false
+    smoothing_sigma: 1.0
+
+# Evaluation (comprehensive metrics)
+evaluation:
+  # Segmentation metrics
+  segmentation_metrics:
+    - "dice_score"
+    - "iou_score"
+    - "hausdorff_distance"
+    - "surface_distance"
+    - "precision"
+    - "recall"
+    
+  # Reconstruction metrics
+  reconstruction_metrics:
+    - "mae"
+    - "rmse"
+    - "ssim"
+    - "psnr"
+    - "ncc"
+    
+  # Statistical analysis
+  statistics:
+    confidence_level: 0.95
+    bootstrap_samples: 1000
+    
+  # Cross-validation for robustness
+  cross_validation:
+    enabled: false  # Set to true for comprehensive evaluation
+    n_folds: 5
+
+# Visualization (comprehensive)
+visualization:
+  figure_size: [20, 15]
+  dpi: 300
+  format: "png"
+  
+  colormaps:
+    drr: "gray"
+    mask: "viridis"
+    volume: "bone"
+    error: "hot"
+    uncertainty: "plasma"
+    
+  show_plots: true
+  save_plots: true
+  output_dir: "outputs/full_pipeline_figures"
+  
+  # Pipeline-specific visualizations
+  pipeline_plots:
+    show_intermediate_steps: true
+    create_summary_figure: true
+    compare_with_ground_truth: true
+
+# Paths (all models required)
+paths:
+  models:
+    # Segmentation models (both views)
+    segmentation_ap: "models/segmentation_ap.pt"
+    segmentation_ml: "models/segmentation_ml.pt"
+    
+    # PCA-CNN models
+    pca_models_dir: "models/pca_cnn/"
+    pca_components: "models/pca.pkl"
+    scaler: "models/scaler.pkl"
+    indices: "models/indices.npy"
+
+# Pipeline Configuration
+pipeline:
+  # Processing order
+  stages:
+    - "segmentation"
+    - "crop_and_resize"
+    - "pca_cnn_preprocessing"
+    - "pca_cnn_prediction"
+    - "volume_reconstruction"
+    - "evaluation"
+    
+  # Error handling
+  error_handling:
+    continue_on_failure: false  # Stop pipeline if any stage fails
+    save_partial_results: true  # Save results from successful stages
+    
+  # Progress tracking
+  progress:
+    show_stage_progress: true
+    save_intermediate_results: true
+    log_timing: true
+
+# Performance (optimized for full pipeline)
+performance:
+  memory_efficient: true
+  clear_cache: true
+  batch_processing: false    # Process one case at a time for stability
+  
+  # Parallel processing within stages
+  parallel_segmentation: false  # Process AP and ML views sequentially
+  parallel_pca_prediction: false  # Process PC models sequentially
+
+# Output (comprehensive saving)
+output:
+  base_dir: "outputs/full_pipeline_results"
+  create_subdirs: true
+  
+  # Save all intermediate results
+  save_intermediate: true
+  save_segmentation_masks: true
+  save_cropped_drrs: true
+  save_pc_coefficients: true
+  save_uncertainty_maps: true
+  save_reconstructed_volumes: true
+  save_evaluation_metrics: true
+  
+  # File formats
+  volume_format: "npy"
+  mask_format: "npy"
+  metrics_format: "json"
+
+# Logging (detailed for debugging)
+logging:
+  level: "INFO"
+  save_logs: true
+  log_dir: "logs/full_pipeline"
+  
+  # Stage-specific logging
+  log_segmentation_details: true
+  log_pca_cnn_details: true
+  log_timing_per_stage: true 

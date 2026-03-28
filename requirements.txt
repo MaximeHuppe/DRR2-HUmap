@@ -1,0 +1,30 @@
+# DRR2-HUmap Dependencies
+# Python 3.9+ required
+
+# Core ML/AI frameworks
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.21.0
+
+# Image processing
+opencv-python>=4.7.0
+scikit-image>=0.19.0
+matplotlib>=3.5.0
+
+# Data processing
+pickle5>=0.0.11; python_version < "3.8"
+sklearn>=1.1.0
+
+# System utilities
+tqdm>=4.64.0
+pathlib2>=2.3.7; python_version < "3.4"
+
+# Optional: For better performance on Apple Silicon
+# pytorch-metal  # Uncomment if needed for MPS acceleration
+
+# Development tools (optional)
+jupyter>=1.0.0
+ipywidgets>=7.6.0
+
+# Note: MPS (Metal Performance Shaders) is automatically available with PyTorch 2.0+ on Apple Silicon
+# GPU acceleration will use MPS on macOS, CUDA on Linux/Windows with NVIDIA GPUs 

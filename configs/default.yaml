@@ -1,0 +1,197 @@
+# DRR2-HUmap Default Configuration
+# This file contains the default parameters for the DRR2-HUmap pipeline
+
+# General Settings
+project_name: "DRR2-HUmap"
+version: "1.0.0"
+description: "Deep Learning Pipeline for DRR Segmentation and HU Prediction"
+
+# Device Configuration
+device:
+  auto_detect: true  # Automatically detect best available device (MPS/CUDA/CPU)
+  preferred: "mps"   # Preferred device if available: "mps", "cuda", "cpu"
+  fallback: "cpu"    # Fallback device if preferred is not available
+
+# Data Configuration
+data:
+  # Input data formats and paths
+  drr_format: "npy"           # Format for DRR files: "npy", "png", "jpg"
+  mask_format: "npy"          # Format for mask files: "npy", "png"
+  
+  # Image dimensions
+  original_drr_size: [256, 512]     # Original DRR dimensions [height, width]
+  segmentation_size: [256, 512]     # Size for segmentation input
+  pca_cnn_size: [64, 256]          # Size for PCA-CNN input
+  
+  # Volume dimensions
+  volume_shape: [64, 64, 256]      # Output volume shape [x, y, z]
+  
+  # Data normalization
+  drr_normalization:
+    mean: 0.0425                   # Training data mean
+    std: 0.0924                    # Training data std
+    
+  # HU value ranges
+  hu_range:
+    min: -1000                     # Minimum HU value
+    max: 3000                      # Maximum HU value
+    threshold: -1000               # HU threshold for masking
+
+# Segmentation Configuration
+segmentation:
+  # Model parameters
+  model:
+    architecture: "AttentionUNet"
+    input_channels: 1
+    output_channels: 1
+    
+  # Preprocessing
+  preprocessing:
+    apply_clahe: true              # Apply CLAHE enhancement
+    clahe_clip_limit: 0.01         # CLAHE clip limit
+    clahe_tile_size: [16, 16]      # CLAHE tile grid size
+    
+  # Inference parameters
+  inference:
+    threshold: 0.5                 # Segmentation threshold
+    batch_size: 1                  # Batch size for inference
+    
+  # Post-processing
+  postprocessing:
+    morphology_operations: true    # Apply morphological operations
+    kernel_size: 3                # Morphological kernel size
+    remove_small_objects: true     # Remove small segmented objects
+    min_object_size: 100          # Minimum object size (pixels)
+
+# PCA-CNN Configuration
+pca_cnn:
+  # PCA parameters
+  pca:
+    n_components: 10              # Number of principal components
+    variance_threshold: 0.95      # Minimum variance to retain
+    
+  # CNN model parameters
+  model:
+    architecture: "PC1Regressor"
+    input_channels: 4             # [raw_ap, raw_ml, clahe_ap, clahe_ml]
+    hidden_dims: [512, 256, 128]  # Hidden layer dimensions
+    dropout_rate: 0.2             # Dropout rate for uncertainty
+    
+  # Training parameters (for reference)
+  training:
+    batch_size: 32
+    learning_rate: 0.001
+    epochs: 100
+    optimizer: "Adam"
+    scheduler: "StepLR"
+    step_size: 30
+    gamma: 0.1
+    
+  # Inference parameters
+  inference:
+    batch_size: 1
+    use_uncertainty: true         # Enable Monte Carlo dropout
+    n_mc_samples: 10             # Number of MC samples for uncertainty
+    
+  # Volume reconstruction
+  reconstruction:
+    apply_smoothing: false        # Apply Gaussian smoothing
+    smoothing_sigma: 1.0         # Gaussian smoothing sigma
+
+# Evaluation Configuration
+evaluation:
+  # Segmentation metrics
+  segmentation_metrics:
+    - "dice_score"
+    - "iou_score"
+    - "hausdorff_distance"
+    - "surface_distance"
+    - "precision"
+    - "recall"
+    
+  # Reconstruction metrics
+  reconstruction_metrics:
+    - "mae"                      # Mean Absolute Error
+    - "rmse"                     # Root Mean Square Error
+    - "ssim"                     # Structural Similarity Index
+    - "psnr"                     # Peak Signal-to-Noise Ratio
+    - "ncc"                      # Normalized Cross Correlation
+    
+  # Statistical analysis
+  statistics:
+    confidence_level: 0.95       # Confidence level for statistics
+    bootstrap_samples: 1000      # Number of bootstrap samples
+    
+# Visualization Configuration
+visualization:
+  # General settings
+  figure_size: [12, 8]           # Default figure size [width, height]
+  dpi: 300                       # Figure DPI for saving
+  format: "png"                  # Save format: "png", "pdf", "eps"
+  
+  # Color maps
+  colormaps:
+    drr: "gray"                  # Colormap for DRR images
+    mask: "viridis"              # Colormap for masks
+    volume: "bone"               # Colormap for CT volumes
+    error: "hot"                 # Colormap for error maps
+    
+  # Plot settings
+  show_plots: true               # Display plots during execution
+  save_plots: false              # Save plots to disk
+  output_dir: "outputs/figures" # Directory for saved figures
+
+# Logging Configuration
+logging:
+  level: "INFO"                  # Logging level: DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  save_logs: true                # Save logs to file
+  log_dir: "logs"               # Directory for log files
+  
+# Performance Configuration
+performance:
+  # Memory management
+  memory_efficient: true         # Use memory-efficient operations
+  clear_cache: true             # Clear GPU cache between operations
+  
+  # Parallel processing
+  num_workers: 4                # Number of data loading workers
+  pin_memory: true              # Pin memory for faster GPU transfer
+  
+  # Progress tracking
+  show_progress: true           # Show progress bars
+  progress_update_interval: 10  # Update interval for progress
+
+# Output Configuration
+output:
+  # Directory structure
+  base_dir: "outputs"           # Base output directory
+  create_subdirs: true          # Create subdirectories by timestamp
+  
+  # File naming
+  timestamp_format: "%Y%m%d_%H%M%S"  # Timestamp format for directories
+  prefix: "drr2humap"           # Prefix for output files
+  
+  # What to save
+  save_intermediate: false       # Save intermediate processing results
+  save_masks: true              # Save segmentation masks
+  save_volumes: true            # Save reconstructed volumes
+  save_metrics: true            # Save evaluation metrics
+  save_config: true             # Save configuration used
+
+# Paths Configuration (these should be updated by users)
+paths:
+  # Model paths (users need to provide their own trained models)
+  models:
+    segmentation_ap: "models/segmentation_ap.pt"
+    segmentation_ml: "models/segmentation_ml.pt"
+    pca_models_dir: "models/pca_cnn/"
+    pca_components: "models/pca.pkl"
+    scaler: "models/scaler.pkl"
+    indices: "models/indices.npy"
+    
+  # Data paths
+  data:
+    input_dir: "data/input"
+    output_dir: "data/output"
+    example_data_dir: "src/example_data" 
