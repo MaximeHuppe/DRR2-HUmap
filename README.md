@@ -4,6 +4,8 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+**Published article:** [https://doi.org/10.1016/j.compbiomed.2025.111434](https://doi.org/10.1016/j.compbiomed.2025.111434) (*Computer Methods and Programs in Biomedicine*).
+
 A comprehensive deep learning pipeline for automated segmentation of anatomical structures in Digitally Reconstructed Radiographs (DRRs) and subsequent Hounsfield Unit (HU) intensity prediction using CNN-PCA models.
 
 ## 🎯 Overview
@@ -329,7 +331,7 @@ The repository includes comprehensive configuration files:
 
 ## 📝 Citation
 
-If you use this code in your research, please cite:
+If you use this code in your research, please cite the [peer-reviewed paper](https://doi.org/10.1016/j.compbiomed.2025.111434) (DOI: [10.1016/j.compbiomed.2025.111434](https://doi.org/10.1016/j.compbiomed.2025.111434)) and/or the repository below.
 
 ```bibtex
 @misc{huppe2024drr2humap,
@@ -337,7 +339,8 @@ If you use this code in your research, please cite:
   author={Huppe, Maxime},
   year={2024},
   institution={Imperial College London},
-  url={https://github.com/your-username/DRR2-HUmap}
+  url={https://github.com/your-username/DRR2-HUmap},
+  doi={10.1016/j.compbiomed.2025.111434}
 }
 ```
 
